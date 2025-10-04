@@ -1,0 +1,23 @@
+{
+  "name": "earthquake",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon server/server.js"
+  },
+  "dependencies": {
+    "@elastic/elasticsearch": "^9.1.1",
+    "axios": "^1.12.2",
+    "config": "^4.1.1",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "log-timestamp": "^0.3.0",
+    "nodemon": "^3.1.10"
+  }
+}
