@@ -11,7 +11,7 @@
     "dev": "nodemon server/server.js"
   },
   "dependencies": {
-    "@elastic/elasticsearch": "^9.1.1",
+    "@elastic/elasticsearch": "^8.14.0",
     "axios": "^1.12.2",
     "config": "^4.1.1",
     "cors": "^2.8.5",

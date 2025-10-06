@@ -1,6 +1,6 @@
 import epress from 'express';
 import cors from 'cors';
-
+import client from './elasticsearch/client.js';
 import dotenv from 'dotenv';
 
 dotenv.config();

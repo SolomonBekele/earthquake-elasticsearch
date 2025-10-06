@@ -1,0 +1,74 @@
+version: '3.7'
+
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.14.0
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=true
+      - xpack.security.authc.api_key.enabled=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD:-changeme}
+    ports:
+      - "9200:9200"
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    networks:
+      - es-net
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s -u elastic:${ELASTIC_PASSWORD:-changeme} http://localhost:9200 | grep -q 'You Know, for Search'"]
+      interval: 10s
+      timeout: 10s
+      retries: 120
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.14.0
+    container_name: kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - ELASTICSEARCH_USERNAME=kibana_system
+      - ELASTICSEARCH_PASSWORD=${KIBANA_PASSWORD:-kibana_password}
+    ports:
+      - "5601:5601"
+    networks:
+      - es-net
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:5601/api/status | grep -q 'all'"]
+      interval: 10s
+      timeout: 10s
+      retries: 60
+
+  setup:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.14.0
+    container_name: setup
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    networks:
+      - es-net
+    command: >
+      bash -c '
+        echo "Waiting for Elasticsearch to be ready..."
+        until curl -s -u elastic:${ELASTIC_PASSWORD:-changeme} http://elasticsearch:9200 > /dev/null; do
+          sleep 5
+        done
+        
+        echo "Setting up Kibana system user password..."
+        curl -u elastic:${ELASTIC_PASSWORD:-changeme} -X POST "http://elasticsearch:9200/_security/user/kibana_system/_password" \
+          -H "Content-Type: application/json" \
+          -d "{\"password\": \"${KIBANA_PASSWORD:-kibana_password}\"}"
+        
+        echo "Setup complete!"
+      '
+    profiles: ["setup"]
+
+volumes:
+  esdata:
+
+networks:
+  es-net:
+    driver: bridge
