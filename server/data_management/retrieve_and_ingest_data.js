@@ -1,7 +1,7 @@
 import express from 'express';
 import axios from 'axios';
 import client from '../elasticsearch/client.js';
-import logTimestamp from 'log-timestamp';
+// import logTimestamp from 'log-timestamp';
 
 const router = express.Router();
 
@@ -62,7 +62,6 @@ router.get('/earthquakes', async (req, res) => {
           pipeline: 'earthquake_data_pipeline',
         });
       }
-
       console.log('✅ All data has been indexed successfully!');
     } catch (err) {
       console.error('❌ Error while indexing data:', err.message);
